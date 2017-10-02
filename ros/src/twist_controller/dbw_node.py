@@ -106,21 +106,21 @@ class DBWNode(object):
         bcmd.pedal_cmd = brake
         self.brake_pub.publish(bcmd)
 
-    def got_velocity(self, velocity):
+    def got_velocity(self, msg):
         # velocity.linear, velocity.angular
         # each of them has properties x, y, z
         pass
 
-    def got_twist(self, twist):
+    def got_twist(self, msg):
         pass
     
-    def got_activation_state(self, activated):
-        if (self.activated != activated.data):
+    def got_activation_state(self, msg):
+        if (self.activated != msg.data):
             rospy.loginfo("%s has been %s",
                           rospy.get_name(),
-                          "activated" if activated else "deactivated")
+                          "activated" if msg.data else "deactivated")
 
-        self.activated = activated.data
+        self.activated = msg.data
         
 
 if __name__ == '__main__':
