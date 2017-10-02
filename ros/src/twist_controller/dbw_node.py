@@ -46,6 +46,8 @@ class DBWNode(object):
         max_lat_accel = rospy.get_param('~max_lat_accel', 3.)
         max_steer_angle = rospy.get_param('~max_steer_angle', 8.)
 
+        self.activated = True
+
         self.steer_pub = rospy.Publisher('/vehicle/steering_cmd',
                                          SteeringCmd, queue_size=1)
         self.throttle_pub = rospy.Publisher('/vehicle/throttle_cmd',
@@ -57,6 +59,18 @@ class DBWNode(object):
         # self.controller = TwistController(<Arguments you wish to provide>)
 
         # TODO: Subscribe to all the topics you need to
+
+        self.current_velocity_sub = rospy.Subscriber('/current_velocity',
+                                                     TwistStamped,
+                                                     self.got_velocity)
+
+        self.twist_cmd_sub = rospy.Subscriber('/twist_cmd',
+                                              TwistStamped,
+                                              self.got_twist)
+
+        self.dbw_enabled = rospy.Subscriber('/vehicle/dbw_enabled',
+                                            Bool,
+                                            self.got_activation_state)
 
         self.loop()
 
@@ -92,6 +106,22 @@ class DBWNode(object):
         bcmd.pedal_cmd = brake
         self.brake_pub.publish(bcmd)
 
+    def got_velocity(self, velocity):
+        # velocity.linear, velocity.angular
+        # each of them has properties x, y, z
+        pass
+
+    def got_twist(self, twist):
+        pass
+    
+    def got_activation_state(self, activated):
+        if (self.activated != activated.data):
+            rospy.loginfo("%s has been %s",
+                          rospy.get_name(),
+                          "activated" if activated else "deactivated")
+
+        self.activated = activated.data
+        
 
 if __name__ == '__main__':
     DBWNode()
