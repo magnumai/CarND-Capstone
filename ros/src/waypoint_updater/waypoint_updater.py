@@ -33,20 +33,26 @@ class WaypointUpdater(object):
 
         # TODO: Add a subscriber for /traffic_waypoint and /obstacle_waypoint below
 
-
         self.final_waypoints_pub = rospy.Publisher('final_waypoints', Lane, queue_size=1)
 
         # TODO: Add other member variables you need below
+        self.current_pose = None
+        self.all_waypoints = None
 
         rospy.spin()
 
     def pose_cb(self, msg):
-        # TODO: Implement
-        pass
+        self.current_pose = msg.pose
+
+        if self.all_waypoints == None:
+            return
+
+        closest_waypoint_index = 1
+        self.publish_waypoints_ahead(closest_waypoint_index)
+        
 
     def waypoints_cb(self, waypoints):
-        # TODO: Implement
-        pass
+        self.all_waypoints = waypoints.waypoints
 
     def traffic_cb(self, msg):
         # TODO: Callback for /traffic_waypoint message. Implement
@@ -70,6 +76,15 @@ class WaypointUpdater(object):
             wp1 = i
         return dist
 
+    def publish_waypoinst_ahead(self, start_index):
+        # what should happen towards the end of the waypoints?
+        end_index = start_index + LOOKAHEAD_WPS
+        
+        lane = Lane()
+        lane.header.frame_id = '/world'
+        lane.header.stamp = rospy.Time(0)
+        lane.waypoints = self.all_waypoints[start_index:end_index]
+        self.final_waypoints_pub.publish(lane)
 
 if __name__ == '__main__':
     try:
